@@ -23,7 +23,7 @@ public:
 		return parse_core();
 	}
 	void advance(){
-		; 
+		;
 		// intentionally no-op
 		// since everytime this function is called, hasMoreCommands is called beforehand
 		// and hasMoreCommands parses source actually in my implementation
@@ -78,18 +78,18 @@ private:
 	}
 
 	void regex_core(std::string str){
-		const std::string symbol_match = "([a-zA-Z_.$:][a-zA-Z\\d_.$:]*)";
-		const std::string dest_match = "([AMD]|A[MD]|[A]?MD)";
-		const std::string comp_match = "(0|[-]?1|[-!]?[DAM]|D[-+&|][AM]|[AMD][-+]1|[AM]-D)";
-		const std::string jump_match = "(JGT|JEQ|JGE|JLT|JNE|JLE|JMP)";
+		#define SYMBOL_MATCH "([a-zA-Z_.$:][a-zA-Z\\d_.$:]*)"
+		#define DEST_MATCH "([AMD]|A[MD]|[A]?MD)"
+		#define COMP_MATCH "(0|[-]?1|[-!]?[DAM]|D[-+&|][AM]|[AMD][-+]1|[AM]-D)"
+		#define JUMP_MATCH "(JGT|JEQ|JGE|JLT|JNE|JLE|JMP)"
 
-		const std::regex a_match1("@" + symbol_match);
-		const std::regex a_match2("@([\\d]*)");
-		const std::regex c_match1(dest_match + "=" + comp_match + ";" + jump_match + "?");
-		const std::regex c_match2(dest_match + "=" + comp_match + ";?");
-		const std::regex c_match3(comp_match + ";" + jump_match + "?");
-		const std::regex c_match4(jump_match);
-		const std::regex l_match("\\(" + symbol_match + "\\)");
+		static const std::regex a_match1("@" SYMBOL_MATCH);
+		static const std::regex a_match2("@([\\d]*)");
+		static const std::regex c_match1(DEST_MATCH "=" COMP_MATCH ";" JUMP_MATCH "?");
+		static const std::regex c_match2(DEST_MATCH "=" COMP_MATCH ";?");
+		static const std::regex c_match3(COMP_MATCH ";" JUMP_MATCH "?");
+		static const std::regex c_match4(JUMP_MATCH);
+		static const std::regex l_match("\\(" SYMBOL_MATCH "\\)");
 
 		std::smatch match;
 		if(std::regex_match(str,match,a_match1)){
@@ -175,7 +175,7 @@ private:
 class Code{
 public:
 	static std::bitset<3> dest(std::string mnemo){
-		const std::unordered_map<std::string,unsigned> binTable = {
+		static const std::unordered_map<std::string,unsigned> binTable = {
 			{"null"	,0},
 			{"M"	,1},
 			{"D"	,2},
@@ -188,7 +188,7 @@ public:
 		return binTable.at(mnemo);
 	}
 	static std::bitset<7> comp(std::string mnemo){
-		const std::unordered_map<std::string,std::string> binTable = {
+		static const std::unordered_map<std::string,std::string> binTable = {
 			{"0"	,"0101010"},
 			{"1"	,"0111111"},
 			{"-1"	,"0111010"},
@@ -221,7 +221,7 @@ public:
 		return std::bitset<7>(binTable.at(mnemo));
 	}
 	static std::bitset<3> jump(std::string mnemo){
-		const std::unordered_map<std::string,unsigned> binTable = {
+		static const std::unordered_map<std::string,unsigned> binTable = {
 			{"null"	,0},
 			{"JGT"	,1},
 			{"JEQ"	,2},
