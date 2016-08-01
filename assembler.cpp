@@ -91,6 +91,11 @@ private:
 		static const std::regex c_match4(JUMP_MATCH);
 		static const std::regex l_match("\\(" SYMBOL_MATCH "\\)");
 
+		#undef SYMBOL_MATCH
+		#undef DEST_MATCH
+		#undef COMP_MATCH
+		#undef JUMP_MATCH
+
 		std::smatch match;
 		if(std::regex_match(str,match,a_match1)){
 			symbol_str = match[1].str();
