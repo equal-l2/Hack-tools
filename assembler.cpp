@@ -77,7 +77,7 @@ private:
 		return true;
 	}
 
-	void regex_core(std::string str){
+	void regex_core(const std::string& str){
 		#define SYMBOL_MATCH "([a-zA-Z_.$:][a-zA-Z\\d_.$:]*)"
 		#define DEST_MATCH "([AMD]|A[MD]|[A]?MD)"
 		#define COMP_MATCH "(0|[-]?1|[-!]?[DAM]|D[-+&|][AM]|[AMD][-+]1|[AM]-D)"
@@ -93,78 +93,36 @@ private:
 
 		std::smatch match;
 		if(std::regex_match(str,match,a_match1)){
-			if (match.size() == 2) {
-				symbol_str = match[1].str();
-				type = A_COMMAND;
-				return;
-			}
-			else{
-				throw std::runtime_error("A_COMMAND regex error 1");
-			}
+			symbol_str = match[1].str();
+			type = A_COMMAND;
 		}
 		if(std::regex_match(str,match,a_match2)){
-			if (match.size() == 2) {
-				symbol_str = match[1].str();
-				type = A_COMMAND;
-				return;
-			}
-			else{
-				throw std::runtime_error("A_COMMAND regex error 2");
-			}
+			symbol_str = match[1].str();
+			type = A_COMMAND;
 		}
 		else if(std::regex_match(str,match,l_match)){
-			if (match.size() == 2) {
-				symbol_str = match[1].str();
-				type = L_COMMAND;
-				return;
-			}
-			else{
-				throw std::runtime_error("L_COMMAND regex error");
-			}
+			symbol_str = match[1].str();
+			type = L_COMMAND;
 		}
 		else if(std::regex_match(str,match,c_match1)){
-			if (match.size() == 4) {
-				dest_str = match[1].str();
-				comp_str = match[2].str();
-				jump_str = match[3].str();
-				type = C_COMMAND;
-				return;
-			}
-			else{
-				throw std::runtime_error("C_COMMAND regex error 1");
-			}
+			dest_str = match[1].str();
+			comp_str = match[2].str();
+			jump_str = match[3].str();
+			type = C_COMMAND;
 		}
 		else if(std::regex_match(str,match,c_match2)){
-			if (match.size() == 3) {
-				dest_str = match[1].str();
-				comp_str = match[2].str();
-				type = C_COMMAND;
-				return;
-			}
-			else{
-				throw std::runtime_error("C_COMMAND regex error 2");
-			}
+			dest_str = match[1].str();
+			comp_str = match[2].str();
+			type = C_COMMAND;
 		}
 		else if(std::regex_match(str,match,c_match3)){
-			if (match.size() == 3) {
-				comp_str = match[1].str();
-				jump_str = match[2].str();
-				type = C_COMMAND;
-				return;
-			}
-			else{
-				throw std::runtime_error("C_COMMAND regex error 3");
-			}
+			comp_str = match[1].str();
+			jump_str = match[2].str();
+			type = C_COMMAND;
 		}
 		else if(std::regex_match(str,match,c_match4)){
-			if (match.size() == 2) {
-				jump_str = match[1].str();
-				type = C_COMMAND;
-				return;
-			}
-			else{
-				throw std::runtime_error("C_COMMAND regex error 4");
-			}
+			jump_str = match[1].str();
+			type = C_COMMAND;
 		}
 		else{
 			throw std::runtime_error("Unknown instruction\n\""+str+"\"\n");
@@ -275,11 +233,6 @@ public:
 		return table.at(symbol);
 	}
 
-	void print(){
-		for(auto elem : table){
-			std::cout << elem.first << " " << elem.second << "\n";
-		}
-	}
 private:
 	std::unordered_map<std::string,add_t> table;
 };
