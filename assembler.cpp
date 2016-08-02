@@ -104,7 +104,7 @@ private:
 			symbol_str = match[1].str();
 			type = A_COMMAND;
 		}
-		if(std::regex_match(str,match,a_match2)){
+		else if(std::regex_match(str,match,a_match2)){
 			symbol_str = match[1].str();
 			type = A_COMMAND;
 		}
