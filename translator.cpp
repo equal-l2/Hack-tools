@@ -101,6 +101,12 @@ int main(int argc, char** argv){
 	}
 	const std::string filename_out = path_in.stem().string() + ".asm";
 
-	std::ofstream ofs(filename_out);
+	CodeWriter cw(filename_out);
 
+	for(auto&& v : files){
+		Parser p(v.string());
+		while(p.hasMoreCommands()){
+			p.advance();
+		}
+	}
 }

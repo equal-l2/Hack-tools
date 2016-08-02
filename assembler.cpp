@@ -17,7 +17,7 @@ class Parser{
 public:
 	enum enumType {A_COMMAND,C_COMMAND,L_COMMAND};
 
-	Parser(std::string filename):ifs(filename){
+	Parser(std::string filename):ifs(filename),line_count(){
 		if(!ifs.is_open()) throw std::runtime_error("File is not found\n");
 	}
 	bool hasMoreCommands(){
@@ -50,6 +50,7 @@ private:
 	std::string dest_str;
 	std::string comp_str;
 	std::string jump_str;
+	unsigned long long line_count;
 	enumType type;
 
 	bool parse_core(){
@@ -58,6 +59,7 @@ private:
 
 		READ_VAL:
 		if(!std::getline(ifs,buf)) return false;
+		++line_count;
 
 		buf.erase(remove_if(buf.begin(), buf.end(), isspace), buf.end()); // remove spaces
 
@@ -131,7 +133,7 @@ private:
 			type = C_COMMAND;
 		}
 		else{
-			throw std::runtime_error("Unknown instruction\n\""+str+"\"\n");
+			throw std::runtime_error("Unknown instruction \""+str+"\" in line " + std::to_string(line_count) + "\n");
 		}
 	}
 };
@@ -258,79 +260,73 @@ int main(int argc, char** argv){
 	}
 	const std::string filename_out = path_in.stem().string() + ".hack";
 
-	try{
-		SymbolTable s;
+	SymbolTable s;
 
-		/* First Path */
-		std::cout << "First Path..." << std::endl;
-		{
-			Parser p(path_in.string());
-			add_t rom_add = 0;
-			while(p.hasMoreCommands()){
-				p.advance();
-				switch(p.commandType()){
-					case Parser::A_COMMAND:{
-						++rom_add;
-						break;
-					}
-					case Parser::C_COMMAND:{
-						++rom_add;
-						break;
-					}
-					case Parser::L_COMMAND:{
-						auto buf = p.symbol();
-						s.addEntry(buf,rom_add);
-						break;
-					}
+	/* First Path */
+	std::cout << "First Path..." << std::endl;
+	{
+		Parser p(path_in.string());
+		add_t rom_add = 0;
+		while(p.hasMoreCommands()){
+			p.advance();
+			switch(p.commandType()){
+				case Parser::A_COMMAND:{
+					++rom_add;
+					break;
+				}
+				case Parser::C_COMMAND:{
+					++rom_add;
+					break;
+				}
+				case Parser::L_COMMAND:{
+					auto buf = p.symbol();
+					s.addEntry(buf,rom_add);
+					break;
 				}
 			}
 		}
-		std::cout << "First Pass Ended..." << std::endl;
+	}
+	std::cout << "First Pass Ended..." << std::endl;
 
-		/* Second Path */
-		std::ofstream ofs(filename_out);
-		{
-			Parser p(path_in.string());
-			add_t var_add = 16;
-			while(p.hasMoreCommands()){
-				p.advance();
-				std::string output;
-				switch(p.commandType()){
-					case Parser::A_COMMAND:{
-						auto buf = p.symbol();
-						add_t add;
-						if(is_number(buf)){
-							add = std::stoul(buf);
+	/* Second Path */
+	std::ofstream ofs(filename_out);
+	{
+		Parser p(path_in.string());
+		add_t var_add = 16;
+		while(p.hasMoreCommands()){
+			p.advance();
+			std::string output;
+			switch(p.commandType()){
+				case Parser::A_COMMAND:{
+					auto buf = p.symbol();
+					add_t add;
+					if(is_number(buf)){
+						add = std::stoul(buf);
+					}
+					else{
+						if(s.contains(buf)){
+							add = s.getAddress(buf);
 						}
 						else{
-							if(s.contains(buf)){
-								add = s.getAddress(buf);
-							}
-							else{
-								s.addEntry(buf,var_add);
-								add = var_add++;
-							}
+							s.addEntry(buf,var_add);
+							add = var_add++;
 						}
-						output = std::bitset<16>(add).to_string();
-						break;
 					}
-					case Parser::C_COMMAND:{
-						output = "111";
-						output += Code::comp(p.comp()).to_string() + Code::dest(p.dest()).to_string() + Code::jump(p.jump()).to_string();
-						break;
-					}
-					case Parser::L_COMMAND:{
-						continue;
-					}
+					output = std::bitset<16>(add).to_string();
+					break;
 				}
-				ofs << output << '\r';
+				case Parser::C_COMMAND:{
+					output = "111";
+					output += Code::comp(p.comp()).to_string() + Code::dest(p.dest()).to_string() + Code::jump(p.jump()).to_string();
+					break;
+				}
+				case Parser::L_COMMAND:{
+					continue;
+				}
 			}
+			ofs << output << '\r';
 		}
-		std::cout << "Successfully Assembled" << std::endl;
-		ofs.close();
 	}
-	catch(const std::runtime_error& e){
-		std::cout << e.what();
-		return 1;
-	}
+	std::cout << "Successfully Assembled" << std::endl;
+	ofs.close();
 }
