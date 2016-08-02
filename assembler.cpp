@@ -46,10 +46,7 @@ public:
 	}
 private:
 	std::ifstream ifs;
-	std::string symbol_str;
-	std::string dest_str;
-	std::string comp_str;
-	std::string jump_str;
+	std::string symbol_str,dest_str,comp_str,jump_str;
 	unsigned long long line_count;
 	enumType type;
 
@@ -85,19 +82,21 @@ private:
 		#define DEST_MATCH "([AMD]|A[MD]|[A]?MD)"
 		#define COMP_MATCH "(0|[-]?1|[-!]?[DAM]|D[-+&|][AM]|[AMD][-+]1|[AM]-D)"
 		#define JUMP_MATCH "(JGT|JEQ|JGE|JLT|JNE|JLE|JMP)"
+		#define DEF_REGEX(name,str) static const std::regex name("^" str "$") 
 
-		static const std::regex a_match1("@" SYMBOL_MATCH);
-		static const std::regex a_match2("@([\\d]*)");
-		static const std::regex c_match1(DEST_MATCH "=" COMP_MATCH ";" JUMP_MATCH "?");
-		static const std::regex c_match2(DEST_MATCH "=" COMP_MATCH ";?");
-		static const std::regex c_match3(COMP_MATCH ";" JUMP_MATCH "?");
-		static const std::regex c_match4(JUMP_MATCH);
-		static const std::regex l_match("\\(" SYMBOL_MATCH "\\)");
+		DEF_REGEX(a_match1,"@" SYMBOL_MATCH);
+		DEF_REGEX(a_match2,"@([\\d]*)$");
+		DEF_REGEX(c_match1,DEST_MATCH "=" COMP_MATCH ";" JUMP_MATCH "?");
+		DEF_REGEX(c_match2,DEST_MATCH "=" COMP_MATCH ";?");
+		DEF_REGEX(c_match3,COMP_MATCH ";" JUMP_MATCH "?");
+		DEF_REGEX(c_match4,JUMP_MATCH);
+		DEF_REGEX(l_match,"\\(" SYMBOL_MATCH "\\)");
 
 		#undef SYMBOL_MATCH
 		#undef DEST_MATCH
 		#undef COMP_MATCH
 		#undef JUMP_MATCH
+		#undef DEF_REGEX
 
 		std::smatch match;
 		if(std::regex_match(str,match,a_match1)){
