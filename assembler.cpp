@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <algorithm>
 #include <regex>
+#include <boost/filesystem.hpp>
 
 using add_t = unsigned;
 
@@ -246,15 +247,16 @@ int main(int argc, char** argv){
 
 	if(argc < 2){
 		std::cout << "Usage : Assembler <filename>\n";
+		std::cout << "Input file's extension must be \".asm\"\n";
 		return 0;
 	}
 
-	const std::string filename_in = argv[1];
-	const std::regex filename_check(".*\\.asm");
-	if(!std::regex_match(filename_in,filename_check)){
-		std::cout << "Bad file extension : file name must end with \".asm\"\n";
+	const boost::filesystem::path path_in = argv[1];
+	if(path_in.extension() != ".asm"){
+		std::cout << "Bad extension : file extension must be \".asm\"\n";
+		return 0;
 	}
-	const std::string filename_out = filename_in.substr(0,filename_in.size()-4) + ".hack";
+	const std::string filename_out = path_in.stem().string() + ".hack";
 
 	try{
 		SymbolTable s;
@@ -262,11 +264,9 @@ int main(int argc, char** argv){
 		/* First Path */
 		std::cout << "First Path..." << std::endl;
 		{
-			Parser p(filename_in);
-			//add_t cnt=0;
+			Parser p(path_in.string());
 			add_t rom_add = 0;
 			while(p.hasMoreCommands()){
-				//if(cnt%100 == 0) std::cout << cnt;
 				p.advance();
 				switch(p.commandType()){
 					case Parser::A_COMMAND:{
@@ -283,8 +283,6 @@ int main(int argc, char** argv){
 						break;
 					}
 				}
-				//++cnt;
-				//std::cout << '\r' << std::flush;
 			}
 		}
 		std::cout << "First Pass Ended..." << std::endl;
@@ -292,11 +290,9 @@ int main(int argc, char** argv){
 		/* Second Path */
 		std::ofstream ofs(filename_out);
 		{
-			Parser p(filename_in);
-			//add_t cnt = 0;
+			Parser p(path_in.string());
 			add_t var_add = 16;
 			while(p.hasMoreCommands()){
-				//if(cnt%100 == 0) std::cout << cnt;
 				p.advance();
 				std::string output;
 				switch(p.commandType()){
@@ -324,13 +320,10 @@ int main(int argc, char** argv){
 						break;
 					}
 					case Parser::L_COMMAND:{
-						goto END;
+						continue;
 					}
 				}
 				ofs << output << '\r';
-				END: ;
-				//++cnt;
-				//std::cout << '\r' << std::flush;
 			}
 		}
 		std::cout << "Successfully Assembled" << std::endl;

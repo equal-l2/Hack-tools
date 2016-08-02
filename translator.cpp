@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <algorithm>
 #include <regex>
+#include <boost/filesystem.hpp>
 
 using add_t = unsigned;
 
@@ -38,14 +39,13 @@ private:
 		READ_VAL:
 		if(!std::getline(ifs,buf)) return false;
 
-		buf.erase(remove_if(buf.begin(), buf.end(), isspace), buf.end()); // remove spaces
-
-		auto n = buf.find("//");
-		if(n != buf.npos){ // if comment exists
-			buf.erase(n);
+		{
+			/* erase comment */
+			auto n = buf.find("//");
+			if(n != buf.npos) buf.erase(n);
 		}
 
-		if(buf == "\n" || buf == "") goto READ_VAL;
+		if(std::all_of(buf.begin(),buf.end(),isspace)) goto READ_VAL;
 
 		try{
 			regex_core(buf);
@@ -78,8 +78,29 @@ private:
 int main(int argc, char** argv){
 
 	if(argc < 2){
-		std::cout << "Usage : Translator <filename>\n";
+		std::cout << "Usage : Translator <filename or directory>\n";
+		std::cout << "Input files' extensions must be \".vm\"\n";
+		std::cout << "If directory is passed, all \".vm\" files will be processed into one output.\n";
 		return 0;
 	}
+
+	std::vector<boost::filesystem::path> files;
+	const boost::filesystem::path path_in = argv[1];
+	if(boost::filesystem::is_directory(path_in)){
+		for(auto&& v : boost::filesystem::directory_iterator(path_in)){
+			if(v.path().extension() == ".vm") files.push_back(v.path());
+		}
+		if(files.empty()){
+			std::cout << "No valid source files\n";
+			return 0;
+		}
+	}
+	else if(path_in.extension() != ".vm"){
+		std::cout << "Bad extension : file extension must be \".vm\"\n";
+		return 0;
+	}
+	const std::string filename_out = path_in.stem().string() + ".asm";
+
+	std::ofstream ofs(filename_out);
 
 }
