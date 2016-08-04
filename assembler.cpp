@@ -17,7 +17,7 @@ class Parser{
 public:
 	enum enumType {A_COMMAND,C_COMMAND,L_COMMAND};
 
-	Parser(std::string filename):ifs(filename),line_count(){
+	Parser(const std::string& filename):ifs(filename),line_count(){
 		if(!ifs.is_open()) throw std::runtime_error("File is not found\n");
 	}
 	bool hasMoreCommands(){
@@ -86,7 +86,7 @@ private:
 
 		DEF_REGEX(a_match1,"@" SYMBOL_MATCH);
 		DEF_REGEX(a_match2,"@([\\d]*)$");
-		DEF_REGEX(c_match1,DEST_MATCH "=" COMP_MATCH ";" JUMP_MATCH "?");
+		DEF_REGEX(c_match1,DEST_MATCH "=" COMP_MATCH ";" JUMP_MATCH);
 		DEF_REGEX(c_match2,DEST_MATCH "=" COMP_MATCH ";?");
 		DEF_REGEX(c_match3,COMP_MATCH ";" JUMP_MATCH "?");
 		DEF_REGEX(c_match4,JUMP_MATCH);
@@ -139,7 +139,7 @@ private:
 
 class Code{
 public:
-	static std::bitset<3> dest(std::string mnemo){
+	static std::bitset<3> dest(const std::string& mnemo){
 		static const std::unordered_map<std::string,unsigned> binTable = {
 			{"null"	,0},
 			{"M"	,1},
@@ -152,7 +152,7 @@ public:
 		};
 		return binTable.at(mnemo);
 	}
-	static std::bitset<7> comp(std::string mnemo){
+	static std::bitset<7> comp(const std::string& mnemo){
 		static const std::unordered_map<std::string,std::string> binTable = {
 			{"0"	,"0101010"},
 			{"1"	,"0111111"},
@@ -185,7 +185,7 @@ public:
 		};
 		return std::bitset<7>(binTable.at(mnemo));
 	}
-	static std::bitset<3> jump(std::string mnemo){
+	static std::bitset<3> jump(const std::string& mnemo){
 		static const std::unordered_map<std::string,unsigned> binTable = {
 			{"null"	,0},
 			{"JGT"	,1},
@@ -228,15 +228,15 @@ public:
 		{"KBD",24576}
 	}){}
 
-	void addEntry(std::string symbol, add_t address){
+	void addEntry(const std::string& symbol, add_t address){
 		table.insert({symbol,address});
 	}
 
-	bool contains(std::string symbol){
+	bool contains(const std::string& symbol){
 		return (table.find(symbol) != table.end());
 	}
 
-	add_t getAddress(std::string symbol){
+	add_t getAddress(const std::string& symbol){
 		return table.at(symbol);
 	}
 
