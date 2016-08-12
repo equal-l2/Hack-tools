@@ -323,9 +323,8 @@ int main(int argc, char** argv){
 					continue;
 				}
 			}
-			ofs << output << '\r';
+			ofs << output << '\n';
 		}
 	}
 	std::cout << "Successfully Assembled" << std::endl;
-	ofs.close();
 }
